@@ -74,12 +74,12 @@ export default function LoveNotesScreen() {
         )}
       </View>
 
-      <View style={styles.footer}>
+      {/* <View style={styles.footer}>
         <Text style={styles.footerText}>
           💡 İpucu: Backend'e sevgi notları ekleyerek{'\n'}
           bu ekranı daha özel hale getirebilirsin!
         </Text>
-      </View>
+      </View> */}
     </View>
   );
 }

@@ -1,13 +1,16 @@
-// MongoDB bağlantı ayarları
 const mongoose = require('mongoose');
 
+/**
+ * MongoDB veritabanına bağlantı kurar
+ */
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('✅ MongoDB bağlantısı başarılı');
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+
+    console.log(`MongoDB Bağlantısı Başarılı: ${conn.connection.host}`);
   } catch (error) {
-    console.error('❌ MongoDB bağlantı hatası:', error.message);
-    process.exit(1);
+    console.error(`MongoDB Bağlantı Hatası: ${error.message}`);
+    process.exit(1); // Bağlantı başarısız olursa uygulamayı durdur
   }
 };
 

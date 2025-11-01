@@ -4,10 +4,13 @@ import { View, Text, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 
 export default function CounterScreen() {
-  // Tanışma tarihi - Buraya kendi tarihinizi yazın
-  const MEETING_DATE = '2023-06-15';
+
+  const MEETING_DATE = '2024-12-01';
 
   const [daysPassed, setDaysPassed] = useState(0);
+  const [years, setYears] = useState(0);
+  const [months, setMonths] = useState(0);
+  const [days, setDays] = useState(0);
 
   useEffect(() => {
     calculateDays();
@@ -22,16 +25,42 @@ export default function CounterScreen() {
   const calculateDays = () => {
     const meetingDate = dayjs(MEETING_DATE);
     const today = dayjs();
-    const diff = today.diff(meetingDate, 'day');
-    setDaysPassed(diff);
+
+    // Toplam gün sayısı
+    const totalDays = today.diff(meetingDate, 'day');
+    setDaysPassed(totalDays);
+
+    // Yıl, ay, gün hesaplama
+    let tempDate = meetingDate;
+
+    // Yılları hesapla
+    const yearsDiff = today.diff(tempDate, 'year');
+    setYears(yearsDiff);
+    tempDate = tempDate.add(yearsDiff, 'year');
+
+    // Ayları hesapla
+    const monthsDiff = today.diff(tempDate, 'month');
+    setMonths(monthsDiff);
+    tempDate = tempDate.add(monthsDiff, 'month');
+
+    // Günleri hesapla
+    const daysDiff = today.diff(tempDate, 'day');
+    setDays(daysDiff);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.emoji}>💞</Text>
       <Text style={styles.title}>Bugün birlikte</Text>
-      <Text style={styles.days}>{daysPassed}</Text>
+      <Text style={styles.days}>{daysPassed}.</Text>
       <Text style={styles.subtitle}>günümüz</Text>
+
+      <View style={styles.detailContainer}>
+        <Text style={styles.detailText}>
+          {years} yıl {months} ay {days} gün
+        </Text>
+      </View>
+
       <Text style={styles.date}>
         {dayjs(MEETING_DATE).format('DD.MM.YYYY')} tarihinden beri
       </Text>
@@ -67,11 +96,29 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: '#FF69B4',
     fontWeight: '600',
-    marginBottom: 30,
+    marginBottom: 20,
+  },
+  detailContainer: {
+    backgroundColor: '#FFF',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  detailText: {
+    fontSize: 20,
+    color: '#FF1493',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   date: {
     fontSize: 16,
     color: '#666',
-    marginTop: 20,
+    marginTop: 10,
   },
 });
