@@ -1,0 +1,55 @@
+// Sevgi notları route'ları
+const express = require('express');
+const router = express.Router();
+const Note = require('../models/Note');
+
+// Tüm notları getir
+router.get('/', async (req, res) => {
+  try {
+    const notes = await Note.find().sort({ createdAt: -1 });
+    res.json(notes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Rastgele bir not getir
+router.get('/random', async (req, res) => {
+  try {
+    const count = await Note.countDocuments();
+    if (count === 0) {
+      return res.status(404).json({ message: 'Henüz not eklenmemiş' });
+    }
+    const random = Math.floor(Math.random() * count);
+    const note = await Note.findOne().skip(random);
+    res.json(note);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Yeni not ekle
+router.post('/', async (req, res) => {
+  const note = new Note({
+    text: req.body.text,
+  });
+
+  try {
+    const newNote = await note.save();
+    res.status(201).json(newNote);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Not sil
+router.delete('/:id', async (req, res) => {
+  try {
+    await Note.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Not silindi' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+module.exports = router;
