@@ -375,7 +375,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingLeft: 10,
-    gap: 5,
   },
   dateButtonText: {
     fontSize: 12,
@@ -471,21 +470,22 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 10,
     marginBottom: 20,
-    gap: 10,
   },
   modalDateText: {
     fontSize: 16,
     color: '#333',
+    marginLeft: 10,
   },
   modalButtons: {
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'space-between',
   },
   modalButton: {
     flex: 1,
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   cancelButton: {
     backgroundColor: '#F5F5F5',
