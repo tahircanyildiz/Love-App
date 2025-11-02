@@ -4,17 +4,19 @@ const router = express.Router();
 const Gallery = require('../models/Gallery');
 const { upload } = require('../config/cloudinary');
 
-// Tüm fotoğrafları getir
+// Tüm fotoğrafları getir (tarihe göre yeniden eskiye)
 router.get('/', async (req, res) => {
   try {
-    const photos = await Gallery.find().sort({ createdAt: -1 });
+    const photos = await Gallery.find().sort({ date: -1, createdAt: -1 });
+    // date: -1 = tarihe göre yeniden eskiye
+    // createdAt: -1 = tarihsiz fotoğraflar en sonda (yeniden eskiye)
     res.json(photos);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Yeni fotoğraf yükle
+// Yeni fotoğraf yükle (not ve tarih ile)
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
@@ -25,6 +27,8 @@ router.post('/', upload.single('image'), async (req, res) => {
       imageUrl: req.file.path,
       cloudinaryId: req.file.filename,
       caption: req.body.caption || '',
+      note: req.body.note || '',
+      date: req.body.date || null,
     });
 
     const newPhoto = await photo.save();
