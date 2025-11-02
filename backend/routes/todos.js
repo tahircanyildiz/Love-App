@@ -13,10 +13,12 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Yeni görev ekle
+// Yeni görev ekle (tarih ve başlık ile)
 router.post('/', async (req, res) => {
   const todo = new Todo({
-    task: req.body.task,
+    title: req.body.title || req.body.task, // Eski task ile uyumluluk
+    task: req.body.task, // Eski task ile uyumluluk
+    date: req.body.date || null,
   });
 
   try {
@@ -27,13 +29,29 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Görevi güncelle (tamamlandı durumu)
+// Görevi güncelle (tamamlandı, başlık, tarih)
 router.patch('/:id', async (req, res) => {
   try {
     const todo = await Todo.findById(req.params.id);
+
+    if (!todo) {
+      return res.status(404).json({ message: 'Görev bulunamadı' });
+    }
+
+    // Güncellenebilir alanlar
     if (req.body.completed !== undefined) {
       todo.completed = req.body.completed;
     }
+    if (req.body.title !== undefined) {
+      todo.title = req.body.title;
+    }
+    if (req.body.task !== undefined) {
+      todo.task = req.body.task;
+    }
+    if (req.body.date !== undefined) {
+      todo.date = req.body.date;
+    }
+
     const updatedTodo = await todo.save();
     res.json(updatedTodo);
   } catch (error) {
