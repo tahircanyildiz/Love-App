@@ -36,6 +36,21 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check endpoint (Cron job için)
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    message: 'Server is alive! 💚'
+  });
+});
+
+// Ping endpoint (Cron job için - basit)
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
 // Server başlat
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
