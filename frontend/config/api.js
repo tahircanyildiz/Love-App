@@ -2,10 +2,13 @@
 import axios from 'axios';
 
 // Backend API adresi
-// Gerçek cihazda test ederken bilgisayarınızın yerel IP adresini kullanın
-// Örnek: http://192.168.1.100:5000
-// r (Windows) veya ifconfig (Mac/Linux) ile IP adresinizi öğrenebilirsiniz
-export const API_BASE_URL = 'http://192.168.1.5:5000/api';
+// Production: Render URL kullan
+// Development: Local IP kullan
+const IS_PRODUCTION = true; // false yaparak local test edebilirsin
+
+export const API_BASE_URL = IS_PRODUCTION
+  ? 'REMOVED_SECRET' // Render URL'ini buraya yaz
+  : 'http://192.168.1.5:5000/api'; // Local test için
 
 // Axios instance oluştur
 const api = axios.create({
