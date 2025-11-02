@@ -4,12 +4,8 @@
     "slug": "couple-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
       "backgroundColor": "#FFE5EC"
     },
     "assetBundlePatterns": [
@@ -20,15 +16,12 @@
       "bundleIdentifier": "com.yourname.coupleapp"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFE5EC"
-      },
-      "package": "com.yourname.coupleapp",
+      "package": "com.tahir.coupleapp",
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "CAMERA"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -40,14 +33,12 @@
         {
           "photosPermission": "Anılarınızı yüklemek için galeri erişimi gerekli."
         }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/notification-icon.png",
-          "color": "#FF1493"
-        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d9360632-e024-4a9c-9fb0-aca68225dd84"
+      }
+    }
   }
 }

@@ -17,10 +17,10 @@ import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
-import {
-  requestNotificationPermissions,
-  scheduleTaskNotification,
-} from '../utils/notifications';
+// import {
+//   requestNotificationPermissions,
+//   scheduleTaskNotification,
+// } from '../utils/notifications';
 
 dayjs.locale('tr');
 
@@ -34,7 +34,7 @@ export default function TodoScreen() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
-    requestNotificationPermissions();
+    // requestNotificationPermissions();
     fetchTodos();
   }, []);
 
@@ -72,9 +72,9 @@ export default function TodoScreen() {
       const createdTodo = response.data;
 
       // Bildirim planla
-      if (createdTodo.date) {
-        await scheduleTaskNotification(createdTodo);
-      }
+      // if (createdTodo.date) {
+      //   await scheduleTaskNotification(createdTodo);
+      // }
 
       setTodos([createdTodo, ...todos]);
       setNewTask('');
@@ -140,9 +140,9 @@ export default function TodoScreen() {
         date: editingTodo.date,
       });
 
-      if (response.data.date) {
-        await scheduleTaskNotification(response.data);
-      }
+      // if (response.data.date) {
+      //   await scheduleTaskNotification(response.data);
+      // }
 
       setTodos(todos.map((todo) => (todo._id === editingTodo._id ? response.data : todo)));
       setShowEditModal(false);

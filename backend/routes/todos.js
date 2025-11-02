@@ -3,10 +3,12 @@ const express = require('express');
 const router = express.Router();
 const Todo = require('../models/Todo');
 
-// Tüm görevleri getir
+// Tüm görevleri getir (tarihe göre sıralı)
 router.get('/', async (req, res) => {
   try {
-    const todos = await Todo.find().sort({ createdAt: -1 });
+    const todos = await Todo.find().sort({ date: 1, createdAt: -1 });
+    // date: 1 = tarihe göre küçükten büyüğe
+    // createdAt: -1 = tarihsiz görevler en sonda (yeniden eskiye)
     res.json(todos);
   } catch (error) {
     res.status(500).json({ message: error.message });
