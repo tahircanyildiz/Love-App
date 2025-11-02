@@ -40,6 +40,13 @@
         {
           "photosPermission": "Anılarınızı yüklemek için galeri erişimi gerekli."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#FF1493"
+        }
       ]
     ]
   }
