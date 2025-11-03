@@ -9,6 +9,7 @@ import CounterScreen from './screens/CounterScreen';
 import TodoScreen from './screens/TodoScreen';
 import LoveNotesScreen from './screens/LoveNotesScreen';
 import GalleryScreen from './screens/GalleryScreen';
+import LettersScreen from './screens/LettersScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -28,6 +29,8 @@ export default function App() {
               iconName = focused ? 'mail' : 'mail-outline';
             } else if (route.name === 'Gallery') {
               iconName = focused ? 'images' : 'images-outline';
+            } else if (route.name === 'Letters') {
+              iconName = focused ? 'mail-open' : 'mail-open-outline';
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -61,6 +64,11 @@ export default function App() {
           name="Gallery"
           component={GalleryScreen}
           options={{ tabBarLabel: 'Galeri' }}
+        />
+        <Tab.Screen
+          name="Letters"
+          component={LettersScreen}
+          options={{ tabBarLabel: 'Mektuplar' }}
         />
       </Tab.Navigator>
     </NavigationContainer>

@@ -8,6 +8,7 @@ const connectDB = require('./config/db');
 const notesRoutes = require('./routes/notes');
 const todosRoutes = require('./routes/todos');
 const galleryRoutes = require('./routes/gallery');
+const lettersRoutes = require('./routes/letters');
 
 const app = express();
 
@@ -23,6 +24,7 @@ connectDB();
 app.use('/api/notes', notesRoutes);
 app.use('/api/todos', todosRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/letters', lettersRoutes);
 
 // Ana route (test için)
 app.get('/', (req, res) => {
@@ -31,7 +33,8 @@ app.get('/', (req, res) => {
     endpoints: {
       notes: '/api/notes',
       todos: '/api/todos',
-      gallery: '/api/gallery'
+      gallery: '/api/gallery',
+      letters: '/api/letters'
     }
   });
 });

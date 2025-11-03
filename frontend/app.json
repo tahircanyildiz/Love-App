@@ -2,12 +2,14 @@
   "expo": {
     "name": "Couple App",
     "slug": "couple-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "sdkVersion": "51.0.0",
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#FFE5EC"
+      "backgroundColor": "#FFE5EC",
+      "image": "./assets/icon.png",
+      "resizeMode": "contain"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -18,6 +20,11 @@
     },
     "android": {
       "package": "com.tahir.coupleapp",
+      "icon": "./assets/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFE5EC"
+      },
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
