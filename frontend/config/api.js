@@ -4,7 +4,7 @@ import axios from 'axios';
 // Backend API adresi
 // Production: Render URL kullan
 // Development: Local IP kullan
-const IS_PRODUCTION = true; // true = production, false = local
+const IS_PRODUCTION = false; // true = production, false = local
 
 // Local için bilgisayarının IP adresini kullan (ipconfig ile bul)
 const LOCAL_IP = '192.168.1.9'; // BUNU KENDİ IP ADRESİNE GÖRe GÜNCELLE

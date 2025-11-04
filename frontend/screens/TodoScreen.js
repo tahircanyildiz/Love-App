@@ -68,18 +68,17 @@ export default function TodoScreen() {
     };
 
     try {
-      const response = await api.post('/todos', newTodoData);
-      const createdTodo = response.data;
+      await api.post('/todos', newTodoData);
 
       // Bildirim planla
       // if (createdTodo.date) {
       //   await scheduleTaskNotification(createdTodo);
       // }
 
-      setTodos([createdTodo, ...todos]);
+      // Listeyi yeniden fetch et (doğru sırayla gelmesi için)
+      await fetchTodos();
       setNewTask('');
       setSelectedDate(null);
-      await AsyncStorage.setItem('todos', JSON.stringify([createdTodo, ...todos]));
     } catch (error) {
       Alert.alert('Hata', 'Görev eklenemedi');
       console.error(error);

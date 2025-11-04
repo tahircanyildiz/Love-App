@@ -126,13 +126,15 @@ export default function LettersScreen() {
         });
       });
 
-      const response = await api.post('/letters', formData, {
+      await api.post('/letters', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      setLetters([response.data, ...letters]);
+      // Listeyi yeniden fetch et (doğru sırayla gelmesi için)
+      await fetchLetters();
+
       setShowCreateModal(false);
       setTitle('');
       setMessage('');

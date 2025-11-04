@@ -4,10 +4,10 @@ const router = express.Router();
 const Letter = require('../models/Letter');
 const { upload } = require('../config/cloudinary');
 
-// Tüm mektupları getir (yeniden eskiye)
+// Tüm mektupları getir (openDate açılış tarihine göre yakından uzağa)
 router.get('/', async (req, res) => {
   try {
-    const letters = await Letter.find().sort({ openDate: -1 });
+    const letters = await Letter.find().sort({ openDate: 1 });
     res.json(letters);
   } catch (error) {
     res.status(500).json({ message: error.message });
