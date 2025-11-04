@@ -22,17 +22,43 @@ export default function LoveNotesScreen() {
   const [showListModal, setShowListModal] = useState(false);
   const [newNoteText, setNewNoteText] = useState('');
   const [allNotes, setAllNotes] = useState([]);
+  const [shownNoteIds, setShownNoteIds] = useState([]); // Gösterilen notların ID'leri
 
   useEffect(() => {
     fetchRandomNote();
   }, []);
 
-  // Rastgele not getir
+  // Rastgele not getir (tüm notlar bitmeden tekrar etmesin)
   const fetchRandomNote = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/notes/random');
-      setNote(response.data);
+      // Tüm notları getir
+      const response = await api.get('/notes');
+      const notes = response.data;
+
+      if (notes.length === 0) {
+        Alert.alert('Bilgi', 'Henüz sevgi notu eklenmemiş 💌');
+        setNote(null);
+        setLoading(false);
+        return;
+      }
+
+      // Henüz gösterilmemiş notları filtrele
+      const unseenNotes = notes.filter(n => !shownNoteIds.includes(n._id));
+
+      // Eğer tüm notlar gösterildiyse, listeyi sıfırla
+      if (unseenNotes.length === 0) {
+        setShownNoteIds([]);
+        // Rastgele bir not seç
+        const randomNote = notes[Math.floor(Math.random() * notes.length)];
+        setNote(randomNote);
+        setShownNoteIds([randomNote._id]);
+      } else {
+        // Henüz gösterilmemiş notlardan rastgele birini seç
+        const randomNote = unseenNotes[Math.floor(Math.random() * unseenNotes.length)];
+        setNote(randomNote);
+        setShownNoteIds([...shownNoteIds, randomNote._id]);
+      }
     } catch (error) {
       if (error.response?.status === 404) {
         Alert.alert('Bilgi', 'Henüz sevgi notu eklenmemiş 💌');
