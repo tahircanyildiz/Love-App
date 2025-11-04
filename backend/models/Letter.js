@@ -34,35 +34,62 @@ const letterSchema = new mongoose.Schema({
   },
 });
 
-// Kaydetmeden önce title ve message'ı şifrele
+// Kaydetmeden önce sadece message'ı şifrele (title şifrelenmeyecek)
 letterSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
-    this.title = encrypt(this.title);
-  }
-  if (this.isModified('message')) {
-    this.message = encrypt(this.message);
+  if (this.isModified('message') && this.message) {
+    try {
+      // Zaten şifrelenmiş mi kontrol et (: karakteri şifreli veriyi gösterir)
+      if (!this.message.includes(':')) {
+        this.message = encrypt(this.message);
+      }
+    } catch (error) {
+      console.error('Şifreleme hatası:', error);
+    }
   }
   next();
 });
 
-// Veritabanından okurken title ve message'ı çöz
+// Veritabanından okurken message'ı çöz
 letterSchema.post('find', function(docs) {
   docs.forEach(doc => {
-    if (doc.title) doc.title = decrypt(doc.title);
-    if (doc.message) doc.message = decrypt(doc.message);
+    if (doc.message) {
+      try {
+        doc.message = decrypt(doc.message);
+      } catch (error) {
+        console.error('Şifre çözme hatası:', error);
+      }
+    }
   });
 });
 
 letterSchema.post('findOne', function(doc) {
-  if (doc) {
-    if (doc.title) doc.title = decrypt(doc.title);
-    if (doc.message) doc.message = decrypt(doc.message);
+  if (doc && doc.message) {
+    try {
+      doc.message = decrypt(doc.message);
+    } catch (error) {
+      console.error('Şifre çözme hatası:', error);
+    }
+  }
+});
+
+letterSchema.post('findOneAndUpdate', function(doc) {
+  if (doc && doc.message) {
+    try {
+      doc.message = decrypt(doc.message);
+    } catch (error) {
+      console.error('Şifre çözme hatası:', error);
+    }
   }
 });
 
 letterSchema.post('save', function(doc) {
-  if (doc.title) doc.title = decrypt(doc.title);
-  if (doc.message) doc.message = decrypt(doc.message);
+  if (doc.message) {
+    try {
+      doc.message = decrypt(doc.message);
+    } catch (error) {
+      console.error('Şifre çözme hatası:', error);
+    }
+  }
 });
 
 module.exports = mongoose.model('Letter', letterSchema);

@@ -1,274 +1,558 @@
-# 💞 Couple App - Çift Uygulaması
+# 💞 Couple App - Aşk Uygulaması
 
-React Native (Expo) + Node.js + MongoDB + Cloudinary ile geliştirilmiş sevgi dolu bir mobil uygulama.
+Sevgilinizle özel anılarınızı paylaşabileceğiniz, birlikte yapılacaklar listesi oluşturabileceğiniz ve zaman kapsülü mektupları gönderebileceğiniz tam özellikli bir çift uygulaması.
+
+![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
 
 ## 📱 Özellikler
 
-- **Gün Sayacı**: Tanışma tarihinden bu yana geçen günleri gösterir
-- **Yapılacaklar**: Her iki cihazda da senkronize olan todo listesi
-- **Sevgi Notları**: Rastgele sevgi notları görüntüleme
-- **Anı Galerisi**: Fotoğrafları Cloudinary'e yükleyip paylaşma
+### ❤️ Sevgi Notları
+- Rastgele sevgi notları görüntüleme
+- Yeni sevgi notu ekleme
+- Tüm notları listeleme ve silme
+- Akıllı tekrar önleme sistemi (tüm notlar bitmeden aynı not tekrar etmez)
 
-## 🛠️ Teknolojiler
+### 💌 Aşk Mektupları (Zaman Kapsülü)
+- Gelecekteki bir tarih için mektup yazma
+- Fotoğraf ekleme (5 adete kadar)
+- Açılış tarihine göre otomatik sıralama
+- Tarih geldiğinde mektup açma
+- Geri sayım gösterimi
 
-### Frontend
-- React Native (Expo)
-- React Navigation
-- Axios
-- dayjs
-- expo-image-picker
-- AsyncStorage
+### 📸 Anı Galerisi
+- Cloudinary entegrasyonu ile fotoğraf yükleme
+- Grid görünüm
+- Detaylı görüntüleme
+- Fotoğraf silme
 
-### Backend
-- Node.js + Express
-- MongoDB (Mongoose)
-- Cloudinary
-- Multer
+### ✅ Yapılacaklar Listesi
+- Tarih ekleyebilme
+- Tamamlama işaretleme
+- Düzenleme ve silme
+- Tarihli görevler için sıralama
 
----
+### 💝 Aşk Sayacı
+- Birlikte geçirilen gün sayısı
+- Tarih seçimi ve güncelleme
+- Kalp animasyonu
 
-## 📦 Kurulum Adımları
+## 🏗️ Proje Yapısı
 
-### 1. Backend Kurulumu
+```
+usApp/
+├── backend/                 # Node.js + Express API
+│   ├── config/             # Veritabanı ve Cloudinary ayarları
+│   ├── models/             # MongoDB şemaları
+│   ├── routes/             # API endpoint'leri
+│   ├── utils/              # Yardımcı fonksiyonlar (şifreleme)
+│   ├── .env.example        # Çevre değişkenleri şablonu
+│   └── server.js           # Ana sunucu dosyası
+│
+└── frontend/               # React Native (Expo) Mobil Uygulama
+    ├── config/             # API ayarları
+    ├── screens/            # Uygulama ekranları
+    ├── assets/             # Görseller ve ikonlar
+    ├── app.json            # Expo yapılandırması
+    └── App.js              # Ana uygulama bileşeni
+```
 
-#### a) MongoDB Atlas Hesabı Oluşturma
+## 🚀 Kurulum
 
-1. [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) adresine git
-2. Ücretsiz hesap oluştur
-3. Yeni bir cluster oluştur (M0 - FREE tier)
-4. Database Access > Add New Database User
-   - Username ve password belirle
-   - Built-in Role: Read and write to any database
-5. Network Access > Add IP Address
-   - "Allow Access from Anywhere" seç (0.0.0.0/0)
-6. Clusters > Connect > Connect your application
-   - Connection string'i kopyala
-   - `mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/coupleapp`
+### Ön Gereksinimler
 
-#### b) Cloudinary Hesabı Oluşturma
+- **Node.js** (v16 veya üzeri)
+- **npm** veya **yarn**
+- **MongoDB Atlas** hesabı (ücretsiz)
+- **Cloudinary** hesabı (ücretsiz)
+- **Expo CLI** (mobil uygulama için)
+- **EAS CLI** (APK build için - opsiyonel)
 
-1. [Cloudinary](https://cloudinary.com/) adresine git
-2. Ücretsiz hesap oluştur
-3. Dashboard'dan şu bilgileri al:
-   - Cloud Name
-   - API Key
-   - API Secret
+### 1. Projeyi Klonlayın
 
-#### c) Backend Paketlerini Yükle
+```bash
+git clone <repository-url>
+cd usApp
+```
+
+### 2. Backend Kurulumu
 
 ```bash
 cd backend
 npm install
 ```
 
-#### d) .env Dosyasını Düzenle
+#### .env Dosyası Oluşturma
 
-[backend/.env](backend/.env) dosyasını aç ve bilgileri güncelle:
+1. `.env.example` dosyasını kopyalayın:
+```bash
+cp .env.example .env
+```
+
+2. `.env` dosyasını düzenleyin:
 
 ```env
-MONGODB_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/coupleapp?retryWrites=true&w=majority
+# MongoDB Atlas'tan connection string alın
+MONGODB_URI=mongodb+srv://kullanici:sifre@cluster.mongodb.net/veritabani
+
+# Cloudinary Dashboard'dan alın (https://cloudinary.com)
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
 PORT=5000
+
+# Güvenlik için rastgele bir token
+API_TOKEN=rastgele-güvenli-token-123
+
+# Şifreleme anahtarı oluşturun:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+ENCRYPTION_KEY=sizin-64-karakterlik-hex-anahtariniz
 ```
 
-#### e) Backend'i Başlat
+#### MongoDB Atlas Kurulumu
 
+1. [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) hesabı oluşturun
+2. Ücretsiz cluster oluşturun (M0)
+3. **Database Access** → Add New Database User
+   - Username ve password belirleyin
+   - Built-in Role: Read and write to any database
+4. **Network Access** → Add IP Address
+   - "Allow Access from Anywhere" seçin (0.0.0.0/0)
+5. **Clusters** → Connect → Connect your application
+   - Connection string'i kopyalayın
+   - `.env` dosyasına yapıştırın
+
+#### Cloudinary Kurulumu
+
+1. [Cloudinary](https://cloudinary.com) hesabı oluşturun (ücretsiz)
+2. Dashboard'dan şu bilgileri alın:
+   - **Cloud Name**
+   - **API Key**
+   - **API Secret**
+3. `.env` dosyasına ekleyin
+
+#### Şifreleme Anahtarı Oluşturma
+
+Terminal'de çalıştırın:
 ```bash
-npm run dev
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+Çıkan 64 karakterlik kodu `.env` dosyasındaki `ENCRYPTION_KEY` alanına yapıştırın.
 
-Tarayıcıda `http://localhost:5000` adresine git, API çalışıyorsa JSON yanıt göreceksin.
-
----
-
-### 2. Frontend Kurulumu
-
-#### a) Expo CLI Yükleme (Global)
-
-```bash
-npm install -g expo-cli
-```
-
-#### b) Frontend Paketlerini Yükle
-
-```bash
-cd frontend
-npm install
-```
-
-#### c) API Adresini Güncelle
-
-Bilgisayarının yerel IP adresini öğren:
-
-**Windows:**
-```bash
-ipconfig
-```
-
-**Mac/Linux:**
-```bash
-ifconfig
-```
-
-IPv4 adresini bul (örnek: 192.168.1.100)
-
-[frontend/config/api.js](frontend/config/api.js) dosyasını aç ve güncelle:
-
-```javascript
-export const API_BASE_URL = 'http://192.168.1.100:5000/api';
-```
-
-#### d) Frontend'i Başlat
+#### Backend'i Çalıştırma
 
 ```bash
 npm start
-# veya
-expo start
+# veya development mode için
+npm run dev
 ```
 
-Terminal'de QR kod görünecek.
+Sunucu `http://localhost:5000` adresinde çalışacak.
 
----
-
-### 3. Gerçek Cihazda Test Etme
-
-#### a) Expo Go Uygulamasını İndir
-
-- Android: [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
-- iOS: [App Store](https://apps.apple.com/app/expo-go/id982107779)
-
-#### b) Uygulamayı Aç
-
-1. Telefonunun Wi-Fi'sinin **bilgisayarınla aynı ağda** olduğundan emin ol
-2. Expo Go uygulamasını aç
-3. QR kodu tara
-4. Uygulama yüklenecek ve açılacak
-
----
-
-### 4. İlk Veri Ekleme
-
-Backend API'sine örnek veri eklemek için:
-
-#### Sevgi Notu Ekle
+### 3. Frontend Kurulumu
 
 ```bash
-curl -X POST http://localhost:5000/api/notes \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Seninle geçirdiğim her an çok özel 💕"}'
+cd ../frontend
+npm install
 ```
 
-Veya Postman/Insomnia kullanarak POST isteği gönder.
+#### Bağımlılık Kontrolü ve Düzeltme
 
-**Birkaç örnek not ekle:**
+```bash
+# Bağımlılık kontrolü
+npx expo-doctor
 
-```json
-{"text": "Gülüşün beni her zaman mutlu ediyor 😊"}
-{"text": "Seninle olmak hayatımın en güzel hediyesi 🎁"}
-{"text": "Her gün seni daha çok seviyorum 💗"}
-{"text": "Yanımda olduğun için şanslıyım 🍀"}
+# Sorunları otomatik düzelt
+npx expo install --check
+npx expo install --fix
 ```
 
----
+#### API Bağlantısını Yapılandırma
 
-## 📱 APK Oluşturma (Android)
+`frontend/config/api.js` dosyasını açın:
 
-### Yöntem 1: Expo Build (EAS Build)
+**Geliştirme (Development) için:**
+```javascript
+const IS_PRODUCTION = false;
+const LOCAL_IP = '192.168.1.9'; // ← Kendi bilgisayarınızın IP adresi
+```
 
-#### a) EAS CLI Yükle
+**Production (APK) için:**
+```javascript
+const IS_PRODUCTION = true; // ← API URL olarak Render kullanılacak
+```
+
+> **💡 IP Adresinizi Bulmak:**
+>
+> **Windows:**
+> ```bash
+> ipconfig
+> ```
+> "Wireless LAN adapter Wi-Fi" altındaki "IPv4 Address" değerini kullanın
+>
+> **Mac/Linux:**
+> ```bash
+> ifconfig
+> # veya
+> ip addr
+> ```
+
+#### Frontend'i Çalıştırma
+
+```bash
+npx expo start
+```
+
+QR kod terminalde görünecek. Expo Go uygulamasıyla telefonunuzdan tarayın.
+
+**Önemli:** Telefon ve bilgisayar aynı Wi-Fi ağında olmalı!
+
+## 📦 APK Build Alma
+
+### 1. EAS CLI Kurulumu
 
 ```bash
 npm install -g eas-cli
-```
-
-#### b) Expo Hesabına Giriş Yap
-
-```bash
 eas login
 ```
 
-#### c) Projeyi Yapılandır
+### 2. Projeyi Yapılandırma
 
 ```bash
 cd frontend
 eas build:configure
 ```
 
-#### d) Android APK Oluştur
+### 3. API Ayarını Production'a Çevirin ⚠️
 
-```bash
-eas build -p android --profile preview
+**ÇOK ÖNEMLİ:** APK build almadan önce `frontend/config/api.js` dosyasını düzenleyin:
+
+```javascript
+const IS_PRODUCTION = true; // ✅ true yapın!
 ```
 
-Build tamamlandığında link gelecek, APK'yı indirebilirsin.
+Bu ayar yapılmazsa APK local IP'ye bağlanmaya çalışır ve çalışmaz!
 
-### Yöntem 2: Expo Classic Build (Eski Yöntem)
+### 4. Build Başlatma
 
 ```bash
-expo build:android
+# Preview build (hızlı test için)
+eas build --platform android --profile preview
+
+# Production build (Play Store için)
+eas build --platform android --profile production
 ```
 
-APK veya AAB seç, build tamamlandığında linki al.
+Build tamamlandığında EAS size bir link verecek, oradan APK'yı indirebilirsiniz.
 
----
+### Build Sorunları
 
-## 🎨 Ekran Görüntüleri
+Eğer build sırasında hata alırsanız:
 
-### Sekme 1: Gün Sayacı 💞
-Tanışma tarihinden bu yana geçen günleri gösterir.
+```bash
+cd frontend
 
-### Sekme 2: Yapılacaklar 📝
-Senkronize todo listesi.
+# Node modules temizle
+rm -rf node_modules
+npm install
 
-### Sekme 3: Sevgi Notları 💌
-Rastgele sevgi notu gösterir.
+# Bağımlılıkları düzelt
+npx expo install --fix
 
-### Sekme 4: Galeri 📸
-Fotoğrafları Cloudinary'e yükler.
+# Native klasörleri temizle ve yeniden oluştur
+rm -rf android ios
+npx expo prebuild
 
----
+# Build'i cache temizleyerek tekrar dene
+eas build --platform android --profile preview --clear-cache
+```
 
-## 🔧 Sorun Giderme
+## 🔧 Yapılandırma
 
-### Backend'e bağlanamıyorum
-- Backend'in çalıştığından emin ol: `npm run dev`
-- IP adresinin doğru olduğunu kontrol et
-- Telefon ve bilgisayar aynı Wi-Fi'de mi?
-- Firewall backend portunu (5000) engelliyor olabilir
+### Tarihi Değiştirme (Aşk Sayacı)
 
-### Fotoğraf yüklenmiyor
-- Cloudinary ayarlarının doğru olduğunu kontrol et
-- .env dosyasındaki bilgileri doğrula
-- Backend loglarını kontrol et
+Uygulamayı açın → **Aşk Sayacı** sekmesine gidin → Tarihe tıklayın → Yeni tarih seçin.
+
+Tarih local storage'da saklanır, böylece değişiklik kalıcı olur.
+
+### Backend URL'sini Değiştirme
+
+**Render veya başka bir servis kullanıyorsanız:**
+
+`frontend/config/api.js`:
+```javascript
+export const API_BASE_URL = IS_PRODUCTION
+  ? 'https://sizin-backend-urliniz.com/api'  // ← Burası değişecek
+  : `http://${LOCAL_IP}:5000/api`;
+```
+
+### Uygulama İsmini ve İkonunu Değiştirme
+
+`frontend/app.json`:
+```json
+{
+  "expo": {
+    "name": "Yeni İsim",           // ← Uygulama adı
+    "slug": "yeni-slug",            // ← URL slug
+    "version": "1.0.0",             // ← Versiyon
+    "icon": "./assets/icon.png",    // ← İkon yolu
+    "android": {
+      "package": "com.example.app"  // ← Paket adı
+    }
+  }
+}
+```
+
+### Renk Temasını Değiştirme
+
+Her ekran dosyasında (`frontend/screens/*.js`) `StyleSheet` içinde renkler tanımlı:
+
+```javascript
+// Örnek: LoveNotesScreen.js
+styles = StyleSheet.create({
+  header: {
+    backgroundColor: '#FFB6C1',  // ← Pembe header
+  },
+  // ...
+})
+```
+
+Ana renk paleti:
+- `#FFB6C1` - Açık pembe (headerlar)
+- `#FF69B4` - Koyu pembe (butonlar)
+- `#FF1493` - Derin pembe (vurgular)
+
+## 🌐 Deployment
+
+### Backend (Render.com - Ücretsiz)
+
+1. [Render.com](https://render.com) hesabı oluşturun
+2. "New Web Service" oluşturun
+3. GitHub reposunu bağlayın
+4. Ayarlar:
+   - **Name:** couple-app-backend
+   - **Environment:** Node
+   - **Build Command:** `cd backend && npm install`
+   - **Start Command:** `cd backend && npm start`
+   - **Root Directory:** `/` (boş bırakın)
+5. **Environment Variables** ekleyin (`.env` dosyasındaki tüm değişkenler):
+   - `MONGODB_URI`
+   - `CLOUDINARY_CLOUD_NAME`
+   - `CLOUDINARY_API_KEY`
+   - `CLOUDINARY_API_SECRET`
+   - `PORT` → `10000` (Render default)
+   - `API_TOKEN`
+   - `ENCRYPTION_KEY`
+6. "Create Web Service" tıklayın
+
+Render size bir URL verecek (örn: `https://your-app.onrender.com`). Bu URL'yi frontend'de kullanın:
+
+`frontend/config/api.js`:
+```javascript
+export const API_BASE_URL = IS_PRODUCTION
+  ? 'https://your-app.onrender.com/api'  // ← Render URL'iniz
+  : `http://${LOCAL_IP}:5000/api`;
+```
+
+**Not:** Render ücretsiz planında 15 dakika hareketsizlikten sonra sunucu uyur. İlk istekte yavaş olabilir.
+
+## 📝 API Endpoints
+
+### Sevgi Notları
+- `GET /api/notes` - Tüm notları getir
+- `GET /api/notes/random` - Rastgele not getir
+- `POST /api/notes` - Yeni not ekle
+  ```json
+  { "text": "Sevgi notu içeriği" }
+  ```
+- `DELETE /api/notes/:id` - Not sil
+
+### Aşk Mektupları
+- `GET /api/letters` - Tüm mektupları getir (tarih sıralı)
+- `POST /api/letters` - Yeni mektup ekle (multipart/form-data)
+  - `title`: string
+  - `message`: string
+  - `openDate`: ISO date string
+  - `photos`: File[] (max 5)
+- `PATCH /api/letters/:id/open` - Mektubu aç
+- `DELETE /api/letters/:id` - Mektup sil
+
+### Galeri
+- `GET /api/gallery` - Tüm fotoğrafları getir
+- `POST /api/gallery` - Fotoğraf yükle (multipart/form-data)
+  - `image`: File
+  - `description`: string (optional)
+- `DELETE /api/gallery/:id` - Fotoğraf sil
+
+### Yapılacaklar
+- `GET /api/todos` - Tüm görevleri getir
+- `POST /api/todos` - Yeni görev ekle
+  ```json
+  {
+    "title": "Görev başlığı",
+    "date": "2024-01-01T12:00:00.000Z" // optional
+  }
+  ```
+- `PATCH /api/todos/:id` - Görevi güncelle
+  ```json
+  {
+    "title": "Yeni başlık",
+    "completed": true,
+    "date": "2024-01-01T12:00:00.000Z"
+  }
+  ```
+- `DELETE /api/todos/:id` - Görev sil
+
+## 🛠️ Sorun Giderme
+
+### "API bağlantısı yok" hatası
+
+**Kontrol listesi:**
+1. ✅ Backend çalışıyor mu? → `npm start` ile başlatın
+2. ✅ `frontend/config/api.js` içinde `IS_PRODUCTION` doğru mu?
+   - Development: `false` + doğru `LOCAL_IP`
+   - Production: `true`
+3. ✅ Telefon ve bilgisayar aynı Wi-Fi'de mi?
+4. ✅ Firewall backend portunu (5000) engelliyor mu?
+5. ✅ Backend console'da hata var mı?
+
+### Build hatası: "Could not resolve project"
+
+```bash
+cd frontend
+
+# Temizlik
+rm -rf node_modules
+npm install
+
+# Bağımlılıkları düzelt
+npx expo install --fix
+npx expo install expo-font @react-native-community/datetimepicker expo
+
+# Native klasörleri temizle
+rm -rf android ios
+npx expo prebuild --clean
+
+# Build'i tekrar dene
+eas build --platform android --profile preview --clear-cache
+```
+
+### "Dependency validation" hatası
+
+```bash
+npx expo-doctor          # Sorunları göster
+npx expo install --check # Detaylı rapor
+npx expo install --fix   # Otomatik düzelt
+```
 
 ### MongoDB bağlantı hatası
-- MongoDB Atlas'ta IP whitelist kontrol et (0.0.0.0/0)
-- Connection string'deki şifreyi kontrol et (özel karakterler URL encode edilmeli)
-- Database user'ın yetkilerini kontrol et
 
----
+1. **IP Whitelist:** MongoDB Atlas → Network Access → 0.0.0.0/0 ekli mi?
+2. **Credentials:** Username/password doğru mu? Özel karakterler varsa URL encode edin
+3. **Database Access:** User'ın "Read and write to any database" yetkisi var mı?
+4. **Connection String:** `mongodb+srv://` ile başlıyor mu? Database adı ekli mi?
 
-## 📝 Notlar
+Test etmek için:
+```bash
+node -e "require('mongoose').connect('YOUR_URI').then(() => console.log('✅ Connected')).catch(e => console.log('❌', e))"
+```
 
-- `MEETING_DATE` değişkenini [frontend/screens/CounterScreen.js:10](frontend/screens/CounterScreen.js#L10) dosyasında güncellemeyi unutma
-- Production'da API_BASE_URL'yi gerçek sunucu adresine güncelle
-- APK oluştururken app.json'da package name ve bundle ID'yi değiştir
+### Cloudinary fotoğraf yükleme hatası
 
----
+1. **Credentials:** Cloud Name, API Key ve Secret doğru mu?
+2. **Account:** Cloudinary hesabınız aktif mi? (Ücretsiz limiti aşmadınız mı?)
+3. **Logs:** Backend console'da Cloudinary hatası var mı?
+
+### APK local IP'ye bağlanıyor
+
+APK build almadan önce mutlaka:
+```javascript
+// frontend/config/api.js
+const IS_PRODUCTION = true; // ✅ true olmalı!
+```
+
+## 💡 İpuçları
+
+### Development'da Hızlı Test
+
+1. Terminal 1: Backend
+```bash
+cd backend && npm start
+```
+
+2. Terminal 2: Frontend
+```bash
+cd frontend && npx expo start
+```
+
+### İlk Veri Ekleme
+
+Backend çalışıyorken örnek notlar ekleyin:
+
+```bash
+# Not 1
+curl -X POST http://localhost:5000/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Seninle geçirdiğim her an çok özel 💕"}'
+
+# Not 2
+curl -X POST http://localhost:5000/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Gülüşün beni her zaman mutlu ediyor 😊"}'
+
+# Not 3
+curl -X POST http://localhost:5000/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Her gün seni daha çok seviyorum 💗"}'
+```
+
+Veya Postman/Insomnia kullanın.
+
+### Cache Temizleme
+
+```bash
+# Expo cache
+npx expo start --clear
+
+# Metro bundler cache
+rm -rf /tmp/metro-*
+
+# Watchman cache (Mac/Linux)
+watchman watch-del-all
+```
+
+## 🤝 Katkıda Bulunma
+
+1. Fork yapın
+2. Feature branch oluşturun (`git checkout -b feature/harika-ozellik`)
+3. Commit atın (`git commit -m 'Harika özellik eklendi'`)
+4. Push yapın (`git push origin feature/harika-ozellik`)
+5. Pull Request oluşturun
 
 ## 🚀 Geliştirme Fikirleri
 
-- [ ] Bildirimler (doğum günü, özel gün hatırlatıcıları)
+- [ ] Push bildirimleri (Expo Notifications)
 - [ ] Mesajlaşma özelliği
-- [ ] Özel gün sayacı (yıldönümü, doğum günü)
-- [ ] Tema renkleri özelleştirme
-- [ ] Kullanıcı profili ve fotoğrafı
-- [ ] Sesli mesaj gönderme
+- [ ] Özel gün hatırlatıcıları (doğum günü, yıldönümü)
+- [ ] Tema özelleştirme (koyu mod, renk seçimi)
+- [ ] Kullanıcı profilleri ve kimlik doğrulama
+- [ ] Sesli mesaj kaydetme
+- [ ] Video yükleme
+- [ ] Widget desteği (Android)
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altındadır.
+
+## 💖 Teşekkürler
+
+Bu uygulama sevgililer için özel anlar yaratmak amacıyla geliştirilmiştir.
 
 ---
 
-## 💝 Sevgiyle kodlandı
+**Destek İçin:** Herhangi bir sorun yaşarsanız veya öneriniz varsa lütfen issue açın!
 
-İyi kullanımlar! 💞
+**Sevgiyle kodlandı** 💕

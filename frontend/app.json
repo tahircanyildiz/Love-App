@@ -41,7 +41,8 @@
         {
           "photosPermission": "Anılarınızı yüklemek için galeri erişimi gerekli."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "owner": "mrpurposeless34",
     "extra": {
