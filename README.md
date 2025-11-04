@@ -172,17 +172,23 @@ npx expo install --fix
 
 #### API Bağlantısını Yapılandırma
 
-`frontend/config/api.js` dosyasını açın:
-
-**Geliştirme (Development) için:**
-```javascript
-const IS_PRODUCTION = false;
-const LOCAL_IP = '192.168.1.9'; // ← Kendi bilgisayarınızın IP adresi
+1. `.env.example` dosyasını kopyalayın:
+```bash
+cp .env.example .env
 ```
 
-**Production (APK) için:**
-```javascript
-const IS_PRODUCTION = true; // ← API URL olarak Render kullanılacak
+2. `.env` dosyasını düzenleyin:
+
+**Production (APK Build) için:**
+```env
+API_BASE_URL=https://your-app-name.onrender.com/api
+```
+
+**Geliştirme (Local Development) için:**
+```env
+# Production satırını yorum satırı yapın ve local IP'yi aktif edin
+# API_BASE_URL=https://your-app-name.onrender.com/api
+API_BASE_URL=http://192.168.1.9:5000/api
 ```
 
 > **💡 IP Adresinizi Bulmak:**
@@ -199,6 +205,8 @@ const IS_PRODUCTION = true; // ← API URL olarak Render kullanılacak
 > # veya
 > ip addr
 > ```
+
+> **⚠️ Önemli:** APK build almadan önce `.env` dosyasında production URL'ini aktif edin!
 
 #### Frontend'i Çalıştırma
 
@@ -226,12 +234,16 @@ cd frontend
 eas build:configure
 ```
 
-### 3. API Ayarını Production'a Çevirin ⚠️
+### 3. .env Dosyasını Production'a Çevirin ⚠️
 
-**ÇOK ÖNEMLİ:** APK build almadan önce `frontend/config/api.js` dosyasını düzenleyin:
+**ÇOK ÖNEMLİ:** APK build almadan önce `frontend/.env` dosyasını düzenleyin:
 
-```javascript
-const IS_PRODUCTION = true; // ✅ true yapın!
+```env
+# Production URL aktif olmalı
+API_BASE_URL=https://your-app.onrender.com/api
+
+# Local URL yorum satırında olmalı
+# API_BASE_URL=http://192.168.1.9:5000/api
 ```
 
 Bu ayar yapılmazsa APK local IP'ye bağlanmaya çalışır ve çalışmaz!

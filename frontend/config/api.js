@@ -1,17 +1,10 @@
 // API bağlantı ayarları
 import axios from 'axios';
+import { API_BASE_URL as ENV_API_URL } from '@env';
 
-// Backend API adresi
-// Production: Render URL kullan
-// Development: Local IP kullan
-const IS_PRODUCTION = true; // true = production, false = local
-
-// Local için bilgisayarının IP adresini kullan (ipconfig ile bul)
-const LOCAL_IP = '192.168.1.9'; // BUNU KENDİ IP ADRESİNE GÖRe GÜNCELLE
-
-export const API_BASE_URL = IS_PRODUCTION
-  ? 'REMOVED_SECRET'
-  : `http://${LOCAL_IP}:5000/api`;
+// .env dosyasından API URL'i al
+// Eğer .env'de yoksa fallback olarak production URL kullan
+export const API_BASE_URL = ENV_API_URL;
 
 // Axios instance oluştur
 const api = axios.create({

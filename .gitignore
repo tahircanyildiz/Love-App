@@ -22,6 +22,9 @@ frontend/*.key
 frontend/*.mobileprovision
 frontend/*.orig.*
 frontend/web-build/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
 
 # Logs
 *.log
