@@ -1,8 +1,10 @@
 // Ana App dosyası - Navigation yapısı
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView, Platform, StatusBar } from 'react-native';
+import * as NavigationBar from 'expo-navigation-bar';
 
 // Screens
 import CounterScreen from './screens/CounterScreen';
@@ -17,6 +19,14 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [isReady, setIsReady] = useState(false);
 
+  useEffect(() => {
+    // Android navigasyon barını gizle
+    if (Platform.OS === 'android') {
+      NavigationBar.setVisibilityAsync('hidden');
+      NavigationBar.setBehaviorAsync('overlay-swipe');
+    }
+  }, []);
+
   // Splash screen gösteriliyor
   if (!isReady) {
     return <SplashScreen onReady={() => setIsReady(true)} />;
@@ -24,36 +34,45 @@ export default function App() {
 
   // Ana uygulama
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ focused, color, size }) => {
+              let iconName;
 
-            if (route.name === 'Counter') {
-              iconName = focused ? 'heart' : 'heart-outline';
-            } else if (route.name === 'Todo') {
-              iconName = focused ? 'checkbox' : 'checkbox-outline';
-            } else if (route.name === 'Notes') {
-              iconName = focused ? 'mail' : 'mail-outline';
-            } else if (route.name === 'Gallery') {
-              iconName = focused ? 'images' : 'images-outline';
-            } else if (route.name === 'Letters') {
-              iconName = focused ? 'mail-open' : 'mail-open-outline';
-            }
+              if (route.name === 'Counter') {
+                iconName = focused ? 'heart' : 'heart-outline';
+              } else if (route.name === 'Todo') {
+                iconName = focused ? 'checkbox' : 'checkbox-outline';
+              } else if (route.name === 'Notes') {
+                iconName = focused ? 'mail' : 'mail-outline';
+              } else if (route.name === 'Gallery') {
+                iconName = focused ? 'images' : 'images-outline';
+              } else if (route.name === 'Letters') {
+                iconName = focused ? 'mail-open' : 'mail-open-outline';
+              }
 
-            return <Ionicons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: '#FF1493',
-          tabBarInactiveTintColor: '#999',
-          headerShown: false,
-          tabBarStyle: {
-            paddingBottom: 5,
-            paddingTop: 5,
-            height: 60,
-          },
-        })}
-      >
+              return <Ionicons name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: '#FF1493',
+            tabBarInactiveTintColor: '#999',
+            headerShown: false,
+            tabBarStyle: {
+              paddingBottom: 8,
+              paddingTop: 5,
+              height: 65,
+              borderTopWidth: 1,
+              borderTopColor: '#F0F0F0',
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 3,
+            },
+          })}
+        >
         <Tab.Screen
           name="Counter"
           component={CounterScreen}
@@ -81,5 +100,6 @@ export default function App() {
         />
       </Tab.Navigator>
     </NavigationContainer>
+    </SafeAreaView>
   );
 }

@@ -30,7 +30,13 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "softwareKeyboardLayoutMode": "pan",
+      "navigationBar": {
+        "visible": "immersive",
+        "barStyle": "light-content",
+        "backgroundColor": "#FFFFFF"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -42,7 +48,8 @@
           "photosPermission": "Anılarınızı yüklemek için galeri erişimi gerekli."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-navigation-bar"
     ],
     "owner": "mrpurposeless34",
     "extra": {
