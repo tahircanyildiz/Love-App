@@ -34,26 +34,20 @@ async function fixEncryptedTitles() {
 
     for (const letter of letters) {
       try {
-        // Title şifreli mi kontrol et (şifreli veri ':' içerir)
+        console.log(`\n📧 Mektup ID: ${letter._id}`);
+        console.log(`─────────────────────────────────────────`);
+
+        // Title kontrolü
         if (letter.title && letter.title.includes(':')) {
-          console.log(`🔓 Şifreli title bulundu: ${letter.title.substring(0, 30)}...`);
+          console.log(`📌 Title (Şifreli): ${letter.title.substring(0, 50)}...`);
 
-          try {
-            // Title'ı çöz
-            const decryptedTitle = decrypt(letter.title);
-            console.log(`✅ Çözüldü: ${decryptedTitle}`);
+          // Title'ı çözmeyi dene
+          const decryptedTitle = decrypt(letter.title);
 
-            // Doğrudan veritabanında güncelle (pre-save hook'u bypass et)
-            await Letter.updateOne(
-              { _id: letter._id },
-              { $set: { title: decryptedTitle } }
-            );
-
-            fixed++;
-            console.log('');
-          } catch (decryptError) {
-            // Şifre çözülemiyorsa, title'ı "Untitled" yap ve kaydı işaretle
-            console.log(`⚠️  Şifre çözülemedi, "Başlıksız Mektup" olarak ayarlanıyor...`);
+          // Şifre çözülmüş mi kontrol et (hala ':' içeriyorsa başarısız olmuştur)
+          if (decryptedTitle.includes(':')) {
+            // Şifre çözülemedi - başarısız
+            console.log(`⚠️  Title şifre çözülemedi, "Başlıksız Mektup" olarak ayarlanıyor...`);
 
             await Letter.updateOne(
               { _id: letter._id },
@@ -62,12 +56,41 @@ async function fixEncryptedTitles() {
 
             failed++;
             failedLetters.push(letter._id);
-            console.log('');
+          } else {
+            // Başarıyla çözüldü
+            console.log(`✅ Title çözüldü: ${decryptedTitle}`);
+
+            await Letter.updateOne(
+              { _id: letter._id },
+              { $set: { title: decryptedTitle } }
+            );
+
+            fixed++;
           }
         } else {
-          console.log(`✓ Zaten düzgün: ${letter.title}`);
+          console.log(`📌 Title: ${letter.title}`);
           alreadyDecrypted++;
         }
+
+        // Message kontrolü - şifreli mi ve çözülebiliyor mu?
+        if (letter.message) {
+          if (letter.message.includes(':')) {
+            console.log(`📝 Message (Şifreli): ${letter.message.substring(0, 50)}...`);
+
+            // Message'ı çözmeyi dene
+            const decryptedMessage = decrypt(letter.message);
+
+            if (decryptedMessage.includes(':') && decryptedMessage === letter.message) {
+              console.log(`⚠️  Message şifre çözülemedi!`);
+            } else {
+              console.log(`✅ Message çözüldü: ${decryptedMessage.substring(0, 100)}${decryptedMessage.length > 100 ? '...' : ''}`);
+            }
+          } else {
+            console.log(`📝 Message (Şifresiz): ${letter.message.substring(0, 100)}${letter.message.length > 100 ? '...' : ''}`);
+          }
+        }
+
+        console.log('');
       } catch (error) {
         console.error(`❌ Hata (${letter._id}):`, error.message);
       }
