@@ -1,5 +1,5 @@
 // Ana App dosyası - Navigation yapısı
-import React from 'react';
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,10 +10,19 @@ import TodoScreen from './screens/TodoScreen';
 import LoveNotesScreen from './screens/LoveNotesScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import LettersScreen from './screens/LettersScreen';
+import SplashScreen from './screens/SplashScreen';
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const [isReady, setIsReady] = useState(false);
+
+  // Splash screen gösteriliyor
+  if (!isReady) {
+    return <SplashScreen onReady={() => setIsReady(true)} />;
+  }
+
+  // Ana uygulama
   return (
     <NavigationContainer>
       <Tab.Navigator
