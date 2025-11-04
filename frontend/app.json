@@ -7,9 +7,9 @@
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#FFE5EC",
       "image": "./assets/icon.png",
-      "resizeMode": "contain"
+      "resizeMode": "contain",
+      "backgroundColor": "#FFE5EC"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -43,9 +43,10 @@
         }
       ]
     ],
+    "owner": "mrpurposeless34",
     "extra": {
       "eas": {
-        "projectId": "d9360632-e024-4a9c-9fb0-aca68225dd84"
+        "projectId": "4371de53-10c9-4629-9dfa-e8867dd719a7"
       }
     }
   }
