@@ -1,0 +1,26 @@
+# Service account key (contains sensitive credentials)
+service-account-key.json
+
+# Google services
+google-services.json
+
+# Node modules
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db

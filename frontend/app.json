@@ -36,7 +36,8 @@
         "visible": "immersive",
         "barStyle": "light-content",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -49,12 +50,23 @@
         }
       ],
       "expo-font",
-      "expo-navigation-bar"
+      "expo-navigation-bar",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FF1493",
+          "sounds": [],
+          "mode": "production"
+        }
+      ],
+      "@react-native-firebase/app"
     ],
-    "owner": "mrpurposeless34",
+    "owner": "mrpurposeless52",
     "extra": {
+      "expo-navigation-bar": {},
       "eas": {
-        "projectId": "4371de53-10c9-4629-9dfa-e8867dd719a7"
+        "projectId": "6942c883-da5b-4929-bb4b-66b26539c6db"
       }
     }
   }

@@ -20,6 +20,7 @@ import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 dayjs.locale('tr');
 
@@ -112,6 +113,12 @@ export default function GalleryScreen() {
       }
       if (photoDate) {
         formData.append('date', photoDate.toISOString());
+      }
+
+      // Push token'ı ekle (bildirim için)
+      const pushToken = await AsyncStorage.getItem('pushToken');
+      if (pushToken) {
+        formData.append('senderToken', pushToken);
       }
 
       // API'ye gönder

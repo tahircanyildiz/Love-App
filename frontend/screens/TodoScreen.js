@@ -61,10 +61,15 @@ export default function TodoScreen() {
     }
 
     setLoading(true);
+
+    // Push token'ı al (bildirim için)
+    const pushToken = await AsyncStorage.getItem('pushToken');
+
     const newTodoData = {
       title: newTask,
       task: newTask,
       date: selectedDate ? selectedDate.toISOString() : null,
+      senderToken: pushToken,
     };
 
     try {

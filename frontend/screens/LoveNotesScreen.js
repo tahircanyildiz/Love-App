@@ -14,15 +14,19 @@ import {
 } from 'react-native';
 import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoveNotesScreen() {
   const [note, setNote] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [newNoteText, setNewNoteText] = useState('');
+  const [sendNoteText, setSendNoteText] = useState('');
   const [allNotes, setAllNotes] = useState([]);
   const [shownNoteIds, setShownNoteIds] = useState([]); // Gösterilen notların ID'leri
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     fetchRandomNote();
@@ -132,6 +136,36 @@ export default function LoveNotesScreen() {
     setShowListModal(true);
   };
 
+  // Sevgi notu gönder (bildirim ile)
+  const sendLoveNote = async () => {
+    if (!sendNoteText.trim()) {
+      Alert.alert('Uyarı', 'Lütfen bir not yazın');
+      return;
+    }
+
+    try {
+      setSending(true);
+
+      // Push token'ı al
+      const pushToken = await AsyncStorage.getItem('pushToken');
+
+      // Backend'e bildirim gönder
+      await api.post('/notes/send-notification', {
+        text: sendNoteText,
+        senderToken: pushToken,
+      });
+
+      setSendNoteText('');
+      setShowSendModal(false);
+      Alert.alert('Gönderildi! 💕', 'Sevgi notunuz başarıyla gönderildi');
+    } catch (error) {
+      Alert.alert('Hata', 'Not gönderilemedi');
+      console.error(error);
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -142,12 +176,20 @@ export default function LoveNotesScreen() {
           <Ionicons name="eye-outline" size={28} color="#333" />
         </TouchableOpacity>
         <Text style={styles.title}>Sevgi Notları 💌</Text>
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Ionicons name="add" size={28} color="#333" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => setShowSendModal(true)}
+          >
+            <Ionicons name="send" size={24} color="#FF1493" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => setShowAddModal(true)}
+          >
+            <Ionicons name="add" size={28} color="#333" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -218,6 +260,65 @@ export default function LoveNotesScreen() {
                 onPress={addNote}
               >
                 <Text style={styles.saveButtonText}>Kaydet</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Send Note Modal */}
+      <Modal
+        visible={showSendModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowSendModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.sendModalHeader}>
+              <Ionicons name="send" size={32} color="#FF1493" />
+              <Text style={styles.modalTitle}>Sevgi Notu Gönder 💌</Text>
+            </View>
+
+            <Text style={styles.sendDescription}>
+              Sevgilinize özel bir not gönderin. Bildirim olarak ulaşacak! 💕
+            </Text>
+
+            <TextInput
+              style={styles.noteInput}
+              placeholder="Mesajınızı yazın..."
+              value={sendNoteText}
+              onChangeText={setSendNoteText}
+              multiline
+              numberOfLines={6}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => {
+                  setShowSendModal(false);
+                  setSendNoteText('');
+                }}
+                disabled={sending}
+              >
+                <Text style={styles.cancelButtonText}>İptal</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.sendButton]}
+                onPress={sendLoveNote}
+                disabled={sending}
+              >
+                {sending ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <>
+                    <Ionicons name="send" size={18} color="#FFF" />
+                    <Text style={styles.saveButtonText}> Gönder</Text>
+                  </>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -415,10 +516,33 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: '#FF69B4',
   },
+  sendButton: {
+    backgroundColor: '#FF1493',
+    flexDirection: 'row',
+  },
   saveButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  sendModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    gap: 10,
+  },
+  sendDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
   // List Modal Styles
   listModalContent: {
