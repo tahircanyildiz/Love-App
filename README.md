@@ -559,7 +559,6 @@ watchman watch-del-all
 
 Bu proje MIT lisansı altındadır.
 
-## 💖 Teşekkürler
 
 Bu uygulama sevgililer için özel anlar yaratmak amacıyla geliştirilmiştir.
 
@@ -567,4 +566,3 @@ Bu uygulama sevgililer için özel anlar yaratmak amacıyla geliştirilmiştir.
 
 **Destek İçin:** Herhangi bir sorun yaşarsanız veya öneriniz varsa lütfen issue açın!
 
-**Sevgiyle kodlandı** 💕
