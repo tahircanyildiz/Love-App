@@ -1,10 +1,11 @@
 // API bağlantı ayarları
 import axios from 'axios';
-import { API_BASE_URL as ENV_API_URL } from '@env';
+import Constants from 'expo-constants';
 
-// .env dosyasından API URL'i al
-// Eğer .env'de yoksa fallback olarak production URL kullan
-export const API_BASE_URL = ENV_API_URL;
+// app.json'dan API URL'i al (APK'da .env çalışmadığı için)
+export const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl || 'https://love-app-2as0.onrender.com/api';
+
+console.log('API Base URL:', API_BASE_URL);
 
 // Axios instance oluştur
 const api = axios.create({

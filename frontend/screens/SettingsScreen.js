@@ -13,16 +13,17 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { registerDeviceToken, registerForPushNotificationsAsync } from '../utils/notifications';
+import { getPlayerId } from '../utils/oneSignal';
+import { registerDevice } from '../utils/oneSignal';
 
 export default function SettingsScreen() {
   const [userName, setUserName] = useState('');
   const [newName, setNewName] = useState('');
-  const [pushToken, setPushToken] = useState('');
+  const [playerId, setPlayerId] = useState('');
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState({
     userName: 'Yükleniyor...',
-    pushToken: 'Yükleniyor...',
+    playerId: 'Yükleniyor...',
     platform: Platform.OS,
     deviceName: Platform.constants?.Model || 'Unknown',
   });
@@ -34,17 +35,20 @@ export default function SettingsScreen() {
   const loadDebugInfo = async () => {
     try {
       const storedUserName = await AsyncStorage.getItem('userName');
-      const storedPushToken = await AsyncStorage.getItem('pushToken');
+      const storedPlayerId = await AsyncStorage.getItem('playerId');
+
+      // OneSignal'dan player ID al
+      const currentPlayerId = await getPlayerId();
 
       setUserName(storedUserName || 'Bulunamadı');
-      setPushToken(storedPushToken || 'Bulunamadı');
+      setPlayerId(currentPlayerId || storedPlayerId || 'Bulunamadı');
 
       setDebugInfo({
         userName: storedUserName || 'Kayıtlı değil',
-        pushToken: storedPushToken
-          ? `${storedPushToken.substring(0, 30)}...`
+        playerId: (currentPlayerId || storedPlayerId)
+          ? `${(currentPlayerId || storedPlayerId).substring(0, 30)}...`
           : 'Kayıtlı değil',
-        fullToken: storedPushToken || 'Kayıtlı değil',
+        fullPlayerId: currentPlayerId || storedPlayerId || 'Kayıtlı değil',
         platform: Platform.OS,
         deviceName: Platform.constants?.Model || 'Unknown',
       });
@@ -55,8 +59,8 @@ export default function SettingsScreen() {
 
   const handleRetryPushToken = async () => {
     Alert.alert(
-      'Push Token Yenile',
-      'Push notification token\'ı yeniden almayı denemek istiyor musunuz?',
+      'Player ID Yenile',
+      'OneSignal Player ID\'yi yeniden almayı denemek istiyor musunuz?',
       [
         {
           text: 'İptal',
@@ -68,55 +72,41 @@ export default function SettingsScreen() {
             try {
               setLoading(true);
 
-              // Push token al
-              let token;
-              try {
-                token = await registerForPushNotificationsAsync();
-              } catch (tokenError) {
-                Alert.alert(
-                  'Push Token Hatası ❌',
-                  'Token alınamadı:\n\n' + tokenError.message + '\n\n' +
-                  'Olası çözümler:\n' +
-                  '• Bildirim iznini kontrol edin\n' +
-                  '• İnternet bağlantınızı kontrol edin\n' +
-                  '• Telefonunuzda Google Play Services olduğundan emin olun\n' +
-                  '• Uygulamayı kapatıp tekrar açın'
-                );
-                return;
-              }
+              // Player ID al
+              const currentPlayerId = await getPlayerId();
 
-              if (!token) {
+              if (!currentPlayerId) {
                 Alert.alert(
                   'Hata',
-                  'Push token alınamadı. Token boş döndü.\n\n' +
+                  'Player ID alınamadı.\n\n' +
                   'Olası nedenler:\n' +
-                  '1. Bildirim izni verilmemiş\n' +
-                  '2. Fiziksel cihaz değil (emülatör)\n' +
-                  '3. İnternet bağlantısı yok\n' +
-                  '4. Google Play Services yok'
+                  '1. OneSignal henüz başlatılmadı\n' +
+                  '2. Bildirim izni verilmemiş\n' +
+                  '3. İnternet bağlantısı yok\n\n' +
+                  'Lütfen uygulamayı kapatıp tekrar açın.'
                 );
                 return;
               }
 
-              // Token'ı backend'e kaydet
+              // Player ID'yi backend'e kaydet
               const storedUserName = await AsyncStorage.getItem('userName');
               if (storedUserName) {
-                const result = await registerDeviceToken(token, storedUserName);
+                const result = await registerDevice(currentPlayerId, storedUserName);
 
                 if (result.success) {
-                  // Token'ı local storage'a kaydet
-                  await AsyncStorage.setItem('pushToken', token);
+                  // Player ID'yi local storage'a kaydet
+                  await AsyncStorage.setItem('playerId', currentPlayerId);
                   await loadDebugInfo();
 
                   Alert.alert(
                     'Başarılı! ✅',
-                    'Push token başarıyla alındı ve kaydedildi!\n\n' +
-                    'Token: ' + token.substring(0, 30) + '...'
+                    'Player ID başarıyla alındı ve kaydedildi!\n\n' +
+                    'Player ID: ' + currentPlayerId.substring(0, 30) + '...'
                   );
                 } else {
                   Alert.alert(
                     'Kısmi Başarı ⚠️',
-                    'Token alındı ama backend\'e kaydedilemedi:\n\n' + result.error
+                    'Player ID alındı ama backend\'e kaydedilemedi:\n\n' + result.error
                   );
                 }
               } else {
@@ -170,9 +160,9 @@ export default function SettingsScreen() {
               await AsyncStorage.setItem('userName', trimmedName);
 
               // Backend'i güncelle
-              const storedPushToken = await AsyncStorage.getItem('pushToken');
-              if (storedPushToken) {
-                await registerDeviceToken(storedPushToken, trimmedName);
+              const storedPlayerId = await AsyncStorage.getItem('playerId');
+              if (storedPlayerId) {
+                await registerDevice(storedPlayerId, trimmedName);
               }
 
               setUserName(trimmedName);
@@ -307,12 +297,12 @@ export default function SettingsScreen() {
 
           <TouchableOpacity
             style={styles.debugCard}
-            onPress={() => copyToClipboard(pushToken, 'Push Token')}
+            onPress={() => copyToClipboard(playerId, 'Player ID (OneSignal)')}
           >
             <View style={styles.debugRow}>
-              <Text style={styles.debugLabel}>Push Token:</Text>
+              <Text style={styles.debugLabel}>Player ID:</Text>
               <Text style={styles.debugValue} numberOfLines={1}>
-                {debugInfo.pushToken}
+                {debugInfo.playerId}
               </Text>
             </View>
           </TouchableOpacity>
@@ -331,24 +321,24 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          {/* Push Token Durumu */}
-          {debugInfo.pushToken === 'Kayıtlı değil' && (
+          {/* Player ID Durumu */}
+          {debugInfo.playerId === 'Kayıtlı değil' && (
             <View style={styles.warningCard}>
               <Ionicons name="warning" size={24} color="#FF6B6B" />
               <Text style={styles.warningCardText}>
-                Push token kayıtlı değil! Bildirimler çalışmayacak.
+                Player ID kayıtlı değil! Bildirimler çalışmayacak.
               </Text>
             </View>
           )}
 
-          {/* Push Token Yenile Butonu */}
+          {/* Player ID Yenile Butonu */}
           <TouchableOpacity
             style={[styles.button, styles.refreshButton, loading && styles.buttonDisabled]}
             onPress={handleRetryPushToken}
             disabled={loading}
           >
             <Ionicons name="refresh" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Push Token Yenile</Text>
+            <Text style={styles.buttonText}>Player ID Yenile</Text>
           </TouchableOpacity>
         </View>
 

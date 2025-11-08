@@ -45,11 +45,6 @@ export default function App() {
     try {
       const storedUserName = await AsyncStorage.getItem('userName');
       setUserName(storedUserName);
-
-      // Eğer userName varsa push notification sistemini kur
-      if (storedUserName) {
-        initializePushNotifications(storedUserName);
-      }
     } catch (error) {
       console.error('userName kontrol hatası:', error);
     } finally {
@@ -115,7 +110,13 @@ export default function App() {
 
   // Splash screen gösteriliyor
   if (!isReady) {
-    return <SplashScreen onReady={() => setIsReady(true)} />;
+    return <SplashScreen onReady={async () => {
+      setIsReady(true);
+      // SplashScreen sonrası OneSignal'ı başlat
+      if (userName) {
+        await initializePushNotifications(userName);
+      }
+    }} />;
   }
 
   // Ana uygulama
