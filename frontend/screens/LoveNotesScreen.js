@@ -136,7 +136,7 @@ export default function LoveNotesScreen() {
     setShowListModal(true);
   };
 
-  // Sevgi notu gönder (bildirim ile)
+  // Sevgi notu gönder (sadece bildirim, database'e kaydetme)
   const sendLoveNote = async () => {
     if (!sendNoteText.trim()) {
       Alert.alert('Uyarı', 'Lütfen bir not yazın');
@@ -149,17 +149,17 @@ export default function LoveNotesScreen() {
       // Player ID'yi al
       const playerId = await getStoredPlayerId();
 
-      // Backend'e not ekle (bildirim otomatik gönderilecek)
-      await api.post('/notes', {
+      // Sadece bildirim gönder (database'e kaydetme)
+      await api.post('/notes/notify', {
         text: sendNoteText,
         senderPlayerId: playerId,
       });
 
       setSendNoteText('');
       setShowSendModal(false);
-      Alert.alert('Gönderildi! 💕', 'Sevgi notunuz başarıyla gönderildi');
+      Alert.alert('Gönderildi! 💕', 'Sevgi notunuz bildirim olarak gönderildi');
     } catch (error) {
-      Alert.alert('Hata', 'Not gönderilemedi');
+      Alert.alert('Hata', 'Bildirim gönderilemedi');
       console.error(error);
     } finally {
       setSending(false);
