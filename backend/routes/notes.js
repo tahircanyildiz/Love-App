@@ -54,6 +54,39 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Sadece bildirim gönder (database'e kaydetme)
+router.post('/notify', async (req, res) => {
+  try {
+    const { text, senderPlayerId } = req.body;
+
+    if (!text || !senderPlayerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'text ve senderPlayerId gerekli',
+      });
+    }
+
+    // Sadece bildirim gönder, database'e kaydetme
+    await notifyOtherDevices(senderPlayerId, {
+      title: '💕 Sana bir sevgi notu gönderdi',
+      body: text,
+      data: { type: 'notification_only' },
+    });
+
+    res.json({
+      success: true,
+      message: 'Bildirim gönderildi',
+    });
+  } catch (error) {
+    console.error('Bildirim gönderme hatası:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Bildirim gönderilemedi',
+      error: error.message,
+    });
+  }
+});
+
 // Not sil
 router.delete('/:id', async (req, res) => {
   try {
