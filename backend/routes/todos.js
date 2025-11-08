@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Todo = require('../models/Todo');
+const { notifyOtherDevices } = require('../utils/oneSignal');
 
 // Tüm görevleri getir (tarihe göre yeniden eskiye)
 router.get('/', async (req, res) => {
@@ -25,6 +26,17 @@ router.post('/', async (req, res) => {
 
   try {
     const newTodo = await todo.save();
+
+    // OneSignal bildirimi gönder (senderPlayerId varsa)
+    const { senderPlayerId } = req.body;
+    if (senderPlayerId) {
+      await notifyOtherDevices(senderPlayerId, {
+        title: 'Yeni sana yeni bir yapılacak ekledi',
+        body: req.body.title || req.body.task,
+        data: { type: 'todo', todoId: newTodo._id.toString() },
+      });
+    }
+
     res.status(201).json(newTodo);
   } catch (error) {
     res.status(400).json({ message: error.message });

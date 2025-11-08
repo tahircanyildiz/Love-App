@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Note = require('../models/Note');
+const { notifyOtherDevices } = require('../utils/oneSignal');
 
 // Tüm notları getir
 router.get('/', async (req, res) => {
@@ -36,6 +37,17 @@ router.post('/', async (req, res) => {
 
   try {
     const newNote = await note.save();
+
+    // OneSignal bildirimi gönder (senderPlayerId varsa)
+    const { senderPlayerId } = req.body;
+    if (senderPlayerId) {
+      await notifyOtherDevices(senderPlayerId, {
+        title: '💕 Yeni sana bir sevgi notu gönderdi',
+        body: req.body.text,
+        data: { type: 'love_note', noteId: newNote._id.toString() },
+      });
+    }
+
     res.status(201).json(newNote);
   } catch (error) {
     res.status(400).json({ message: error.message });

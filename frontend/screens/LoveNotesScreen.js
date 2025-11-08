@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStoredPlayerId } from '../utils/playerIdHelper';
 
 export default function LoveNotesScreen() {
   const [note, setNote] = useState(null);
@@ -146,13 +146,13 @@ export default function LoveNotesScreen() {
     try {
       setSending(true);
 
-      // Push token'ı al
-      const pushToken = await AsyncStorage.getItem('pushToken');
+      // Player ID'yi al
+      const playerId = await getStoredPlayerId();
 
-      // Backend'e bildirim gönder
-      await api.post('/notes/send-notification', {
+      // Backend'e not ekle (bildirim otomatik gönderilecek)
+      await api.post('/notes', {
         text: sendNoteText,
-        senderToken: pushToken,
+        senderPlayerId: playerId,
       });
 
       setSendNoteText('');

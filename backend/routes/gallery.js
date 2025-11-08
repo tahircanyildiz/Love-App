@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Gallery = require('../models/Gallery');
 const { upload } = require('../config/cloudinary');
+const { notifyOtherDevices } = require('../utils/oneSignal');
 
 // Tüm fotoğrafları getir (tarihe göre yeniden eskiye)
 router.get('/', async (req, res) => {
@@ -32,6 +33,18 @@ router.post('/', upload.single('image'), async (req, res) => {
     });
 
     const newPhoto = await photo.save();
+
+    // OneSignal bildirimi gönder (senderPlayerId varsa)
+    const { senderPlayerId } = req.body;
+    if (senderPlayerId) {
+      const caption = req.body.caption || req.body.note || 'Yeni bir fotoğraf';
+      await notifyOtherDevices(senderPlayerId, {
+        title: '📸 Yeni bir fotoğraf yükledi',
+        body: caption,
+        data: { type: 'gallery', photoId: newPhoto._id.toString() },
+      });
+    }
+
     res.status(201).json(newPhoto);
   } catch (error) {
     res.status(400).json({ message: error.message });

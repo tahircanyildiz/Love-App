@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Letter = require('../models/Letter');
 const { upload } = require('../config/cloudinary');
+const { notifyOtherDevices } = require('../utils/oneSignal');
 
 // Tüm mektupları getir (openDate açılış tarihine göre yakından uzağa)
 router.get('/', async (req, res) => {
@@ -30,6 +31,18 @@ router.post('/', upload.array('photos', 5), async (req, res) => {
     });
 
     const newLetter = await letter.save();
+
+    // OneSignal bildirimi gönder (senderPlayerId varsa)
+    const { senderPlayerId } = req.body;
+    if (senderPlayerId) {
+      const openDate = new Date(req.body.openDate).toLocaleDateString('tr-TR');
+      await notifyOtherDevices(senderPlayerId, {
+        title: '💌 Yeni sana bir aşk mektubu yazdı',
+        body: `${req.body.title} - ${openDate} tarihinde açılabilir`,
+        data: { type: 'letter', letterId: newLetter._id.toString() },
+      });
+    }
+
     res.status(201).json(newLetter);
   } catch (error) {
     res.status(400).json({ message: error.message });

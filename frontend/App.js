@@ -7,10 +7,11 @@ import { SafeAreaView, Platform, StatusBar, Alert } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  registerForPushNotificationsAsync,
-  registerDeviceToken,
-  setupNotificationListeners,
-} from './utils/notifications';
+  initializeOneSignal,
+  registerDevice,
+  setupOneSignalListeners,
+  getPlayerId,
+} from './utils/oneSignal';
 
 // Screens
 import CounterScreen from './screens/CounterScreen';
@@ -39,23 +40,23 @@ export default function App() {
       NavigationBar.setBehaviorAsync('overlay-swipe');
     }
 
-    // Notification listener'ları kur
-    const cleanup = setupNotificationListeners(
+    // OneSignal listener'ları kur
+    setupOneSignalListeners(
       (notification) => {
-        // Bildirim geldiğinde
-        console.log('Yeni bildirim:', notification.request.content);
+        // Bildirim geldiğinde (uygulama açık)
+        console.log('Yeni bildirim (OneSignal):', notification);
+        Alert.alert(
+          notification.title || 'Yeni Bildirim',
+          notification.body || 'Bir bildiriminiz var'
+        );
       },
-      (response) => {
+      (notification) => {
         // Bildirime tıklandığında
-        const data = response.notification.request.content.data;
+        const data = notification.additionalData;
         console.log('Bildirim data:', data);
-
-        // Bildirim tipine göre ekrana yönlendir
-        // TODO: Navigation ref kullanarak ekranlara yönlendirme eklenebilir
+        // TODO: Bildirim tipine göre ekrana yönlendirme eklenebilir
       }
     );
-
-    return cleanup;
   }, []);
 
   const checkUserName = async () => {
@@ -76,20 +77,23 @@ export default function App() {
 
   const initializePushNotifications = async (userNameToUse) => {
     try {
-      // Push token al
-      const token = await registerForPushNotificationsAsync();
+      // OneSignal'ı başlat ve player_id al
+      const playerId = await initializeOneSignal();
 
-      if (token && userNameToUse) {
-        // Token'ı backend'e kaydet (userName ile)
-        await registerDeviceToken(token, userNameToUse);
+      if (playerId && userNameToUse) {
+        // Player ID'yi backend'e kaydet (userName ile)
+        const result = await registerDevice(playerId, userNameToUse);
 
-        // Token'ı local storage'a kaydet (diğer ekranlarda kullanmak için)
-        await AsyncStorage.setItem('pushToken', token);
-
-        console.log('Push notification sistemi hazır!');
+        if (result.success) {
+          // Player ID'yi local storage'a kaydet (diğer ekranlarda kullanmak için)
+          await AsyncStorage.setItem('playerId', playerId);
+          console.log('OneSignal sistemi hazır! Player ID:', playerId);
+        } else {
+          console.error('Cihaz kaydedilemedi:', result.error);
+        }
       }
     } catch (error) {
-      console.error('Push notification init error:', error);
+      console.error('OneSignal init error:', error);
     }
   };
 

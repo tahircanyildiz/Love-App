@@ -60,14 +60,20 @@
           "mode": "production"
         }
       ],
-      "@react-native-firebase/app"
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "production"
+        }
+      ]
     ],
     "owner": "mrpurposeless52",
     "extra": {
       "expo-navigation-bar": {},
       "eas": {
         "projectId": "6942c883-da5b-4929-bb4b-66b26539c6db"
-      }
+      },
+      "oneSignalAppId": "27cfe25a-b361-410e-95b3-54f40cd96206"
     }
   }
 }
