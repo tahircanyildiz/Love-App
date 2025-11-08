@@ -20,6 +20,7 @@ import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
+import { getStoredPlayerId } from '../utils/playerIdHelper';
 
 dayjs.locale('tr');
 
@@ -125,6 +126,12 @@ export default function LettersScreen() {
           type,
         });
       });
+
+      // Player ID'yi ekle (bildirim için)
+      const playerId = await getStoredPlayerId();
+      if (playerId) {
+        formData.append('senderPlayerId', playerId);
+      }
 
       await api.post('/letters', formData, {
         headers: {

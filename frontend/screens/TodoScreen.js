@@ -17,6 +17,7 @@ import api from '../config/api';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
+import { getStoredPlayerId } from '../utils/playerIdHelper';
 // import {
 //   requestNotificationPermissions,
 //   scheduleTaskNotification,
@@ -62,14 +63,14 @@ export default function TodoScreen() {
 
     setLoading(true);
 
-    // Push token'ı al (bildirim için)
-    const pushToken = await AsyncStorage.getItem('pushToken');
+    // Player ID'yi al (bildirim için)
+    const playerId = await getStoredPlayerId();
 
     const newTodoData = {
       title: newTask,
       task: newTask,
       date: selectedDate ? selectedDate.toISOString() : null,
-      senderToken: pushToken,
+      senderPlayerId: playerId,
     };
 
     try {

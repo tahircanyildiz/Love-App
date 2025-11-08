@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/tr';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStoredPlayerId } from '../utils/playerIdHelper';
 
 dayjs.locale('tr');
 
@@ -115,10 +116,10 @@ export default function GalleryScreen() {
         formData.append('date', photoDate.toISOString());
       }
 
-      // Push token'ı ekle (bildirim için)
-      const pushToken = await AsyncStorage.getItem('pushToken');
-      if (pushToken) {
-        formData.append('senderToken', pushToken);
+      // Player ID'yi ekle (bildirim için)
+      const playerId = await getStoredPlayerId();
+      if (playerId) {
+        formData.append('senderPlayerId', playerId);
       }
 
       // API'ye gönder
