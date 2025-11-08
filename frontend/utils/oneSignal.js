@@ -14,10 +14,20 @@ const ONESIGNAL_APP_ID = Constants.expoConfig?.extra?.oneSignalAppId || '27cfe25
  */
 export async function initializeOneSignal() {
   try {
+    console.log('OneSignal başlatılıyor...');
+
+    // Native modüllerin yüklenmesi için kısa bir bekleme
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // OneSignal'ı başlat
     OneSignal.initialize(ONESIGNAL_APP_ID);
+    console.log('OneSignal.initialize çağrıldı');
+
+    // Başlatma sonrası kısa bekleme
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Bildirim izni iste
+    console.log('Bildirim izni isteniyor...');
     const permission = await OneSignal.Notifications.requestPermission(true);
 
     if (!permission) {
@@ -25,11 +35,12 @@ export async function initializeOneSignal() {
       return null;
     }
 
-    // Player ID al (biraz beklemek gerekebilir)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('Bildirim izni verildi, Player ID alınıyor...');
 
-    const deviceState = await OneSignal.User.pushSubscription.getIdAsync();
-    const playerId = deviceState;
+    // Player ID al (biraz beklemek gerekebilir)
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const playerId = await OneSignal.User.pushSubscription.getIdAsync();
 
     if (!playerId) {
       console.log('Player ID alınamadı');
@@ -40,6 +51,7 @@ export async function initializeOneSignal() {
     return playerId;
   } catch (error) {
     console.error('OneSignal başlatma hatası:', error);
+    console.error('Hata detayı:', error.message);
     return null;
   }
 }
@@ -86,21 +98,29 @@ export async function registerDevice(playerId, userName) {
  * @param {Function} onNotificationOpened - Bildirime tıklandığında çağrılacak
  */
 export function setupOneSignalListeners(onNotificationReceived, onNotificationOpened) {
-  // Uygulama açıkken bildirim geldiğinde
-  OneSignal.Notifications.addEventListener('foregroundWillDisplay', (event) => {
-    console.log('Bildirim geldi (foreground):', event.notification);
-    if (onNotificationReceived) {
-      onNotificationReceived(event.notification);
-    }
-  });
+  try {
+    console.log('OneSignal listener\'ları kuruluyor...');
 
-  // Bildirime tıklandığında (uygulama kapalı/arka planda)
-  OneSignal.Notifications.addEventListener('click', (event) => {
-    console.log('Bildirime tıklandı:', event.notification);
-    if (onNotificationOpened) {
-      onNotificationOpened(event.notification);
-    }
-  });
+    // Uygulama açıkken bildirim geldiğinde
+    OneSignal.Notifications.addEventListener('foregroundWillDisplay', (event) => {
+      console.log('Bildirim geldi (foreground):', event.notification);
+      if (onNotificationReceived) {
+        onNotificationReceived(event.notification);
+      }
+    });
+
+    // Bildirime tıklandığında (uygulama kapalı/arka planda)
+    OneSignal.Notifications.addEventListener('click', (event) => {
+      console.log('Bildirime tıklandı:', event.notification);
+      if (onNotificationOpened) {
+        onNotificationOpened(event.notification);
+      }
+    });
+
+    console.log('OneSignal listener\'ları kuruldu');
+  } catch (error) {
+    console.error('Listener kurma hatası:', error);
+  }
 }
 
 /**

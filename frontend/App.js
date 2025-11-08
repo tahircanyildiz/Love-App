@@ -39,24 +39,6 @@ export default function App() {
       NavigationBar.setVisibilityAsync('hidden');
       NavigationBar.setBehaviorAsync('overlay-swipe');
     }
-
-    // OneSignal listener'ları kur
-    setupOneSignalListeners(
-      (notification) => {
-        // Bildirim geldiğinde (uygulama açık)
-        console.log('Yeni bildirim (OneSignal):', notification);
-        Alert.alert(
-          notification.title || 'Yeni Bildirim',
-          notification.body || 'Bir bildiriminiz var'
-        );
-      },
-      (notification) => {
-        // Bildirime tıklandığında
-        const data = notification.additionalData;
-        console.log('Bildirim data:', data);
-        // TODO: Bildirim tipine göre ekrana yönlendirme eklenebilir
-      }
-    );
   }, []);
 
   const checkUserName = async () => {
@@ -92,6 +74,20 @@ export default function App() {
           console.error('Cihaz kaydedilemedi:', result.error);
         }
       }
+
+      // OneSignal listener'ları kur (başlatma sonrası)
+      setupOneSignalListeners(
+        (notification) => {
+          // Bildirim geldiğinde (uygulama açık)
+          console.log('Yeni bildirim (OneSignal):', notification);
+        },
+        (notification) => {
+          // Bildirime tıklandığında
+          const data = notification.additionalData;
+          console.log('Bildirim data:', data);
+          // TODO: Bildirim tipine göre ekrana yönlendirme eklenebilir
+        }
+      );
     } catch (error) {
       console.error('OneSignal init error:', error);
     }
