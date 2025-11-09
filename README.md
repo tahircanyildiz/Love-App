@@ -14,6 +14,9 @@ Sevgilinizle özel anılarınızı paylaşabileceğiniz, birlikte yapılacaklar 
 - Yeni sevgi notu ekleme
 - Tüm notları listeleme ve silme
 - Akıllı tekrar önleme sistemi (tüm notlar bitmeden aynı not tekrar etmez)
+- **Push bildirimleri ile sevgi notu gönderme** (OneSignal entegrasyonu)
+  - Sadece bildirim gönderme (database'e kaydetmeden)
+  - Bildirim + database'e kaydetme seçeneği
 
 ### 💌 Aşk Mektupları (Zaman Kapsülü)
 - Gelecekteki bir tarih için mektup yazma
@@ -67,6 +70,7 @@ usApp/
 - **npm** veya **yarn**
 - **MongoDB Atlas** hesabı (ücretsiz)
 - **Cloudinary** hesabı (ücretsiz)
+- **OneSignal** hesabı (ücretsiz - push bildirimleri için)
 - **Expo CLI** (mobil uygulama için)
 - **EAS CLI** (APK build için - opsiyonel)
 
@@ -133,6 +137,39 @@ ENCRYPTION_KEY=sizin-64-karakterlik-hex-anahtariniz
    - **API Key**
    - **API Secret**
 3. `.env` dosyasına ekleyin
+
+#### OneSignal Kurulumu (Push Bildirimleri)
+
+1. [OneSignal](https://onesignal.com) hesabı oluşturun (ücretsiz)
+2. **New App/Website** → **Google Android (FCM)** seçin
+3. Firebase yapılandırması (gerekli):
+   - [Firebase Console](https://console.firebase.google.com) → Yeni proje oluşturun
+   - Project Settings → Cloud Messaging → **Server Key** kopyalayın
+   - OneSignal'de "Firebase Server Key" alanına yapıştırın
+4. OneSignal Dashboard'dan **App ID**'yi kopyalayın
+5. `frontend/app.json` dosyasını açın ve OneSignal App ID'yi ekleyin:
+   ```json
+   {
+     "expo": {
+       "extra": {
+         "oneSignalAppId": "buraya-app-id-yapistirin"
+       }
+     }
+   }
+   ```
+
+**Önemli:** OneSignal için MongoDB'de `devices` collection'ına cihazlar otomatik kaydedilecek. Her cihaz için:
+- `playerId`: OneSignal Player ID (unique)
+- `userName`: Kullanıcı adı
+- `deviceName`: Cihaz modeli
+- `platform`: android/ios
+- `isActive`: true/false
+- `lastSeen`: Son görülme tarihi
+
+**MongoDB Index Sorunu:** Eğer eski bir Firebase `pushToken` index'i varsa, cihaz kaydı başarısız olabilir. Bu durumda MongoDB Atlas'ta:
+1. Collections → `devices` → Indexes
+2. `pushToken_1` index'ini bulun ve silin
+3. Veya tüm `devices` collection'ını drop edin (veriler silinir!)
 
 #### Şifreleme Anahtarı Oluşturma
 
@@ -376,11 +413,34 @@ export const API_BASE_URL = IS_PRODUCTION
 ### Sevgi Notları
 - `GET /api/notes` - Tüm notları getir
 - `GET /api/notes/random` - Rastgele not getir
-- `POST /api/notes` - Yeni not ekle
+- `POST /api/notes` - Yeni not ekle (database'e kaydet)
   ```json
-  { "text": "Sevgi notu içeriği" }
+  {
+    "text": "Sevgi notu içeriği",
+    "senderPlayerId": "xxx-xxx-xxx" // OPSIYONEL - Eklenirse bildirim de gönderilir
+  }
+  ```
+- `POST /api/notes/notify` - Sadece bildirim gönder (database'e kaydetmez)
+  ```json
+  {
+    "text": "Bildirim mesajı",
+    "senderPlayerId": "xxx-xxx-xxx" // ZORUNLU
+  }
   ```
 - `DELETE /api/notes/:id` - Not sil
+
+### Cihaz Yönetimi (OneSignal)
+- `POST /api/devices/register` - Yeni cihaz kaydet
+  ```json
+  {
+    "playerId": "onesignal-player-id",
+    "userName": "Kullanıcı Adı",
+    "deviceName": "Samsung Galaxy S21",
+    "platform": "android"
+  }
+  ```
+- `GET /api/devices` - Tüm kayıtlı cihazları getir
+- `DELETE /api/devices/:playerId` - Cihaz kaydını sil
 
 ### Aşk Mektupları
 - `GET /api/letters` - Tüm mektupları getir (tarih sıralı)
@@ -417,6 +477,132 @@ export const API_BASE_URL = IS_PRODUCTION
   }
   ```
 - `DELETE /api/todos/:id` - Görev sil
+
+## 🔔 Push Bildirim Sistemi (OneSignal)
+
+### Nasıl Çalışır?
+
+Uygulama OneSignal kullanarak cihazlar arası push bildirimleri gönderir. İşleyiş şu şekilde:
+
+#### 1. Cihaz Kaydı
+- Uygulama ilk açıldığında OneSignal otomatik bir **Player ID** oluşturur
+- Bu Player ID, kullanıcı adıyla birlikte backend'e kaydedilir
+- Her cihaz MongoDB'deki `devices` collection'ında saklanır
+- Ayarlar ekranında Player ID ve cihaz bilgileri görülebilir
+
+#### 2. İki Farklı Bildirim Modu
+
+**Mod 1: Sadece Bildirim Gönder (Database'e Kaydetme)**
+- Sevgi Notları ekranında **kağıt uçağı ikonu** (📧) ile açılan modal
+- Yazılan mesaj sadece bildirim olarak gönderilir
+- Database'e kaydedilmez, geçici bir mesajdır
+- Kullanım: `POST /api/notes/notify`
+- Frontend: `sendLoveNote()` fonksiyonu
+
+**Mod 2: Database'e Kaydet (Bildirim Gönderme)**
+- Sevgi Notları ekranında **artı ikonu** (+) ile açılan modal
+- Yazılan not database'e kaydedilir
+- Bildirim gönderilmez, sadece not listesine eklenir
+- Tüm notlar arasında görünür
+- Kullanım: `POST /api/notes` (senderPlayerId olmadan)
+- Frontend: `addNote()` fonksiyonu
+
+#### 3. Bildirim Akışı
+
+```
+Cihaz 1 (Gönderen)                    Backend                    Cihaz 2 (Alıcı)
+     |                                   |                              |
+     | 1. Bildirim gönder isteği         |                              |
+     |---------------------------------->|                              |
+     |    POST /notes/notify             |                              |
+     |    { text, senderPlayerId }       |                              |
+     |                                   |                              |
+     |                                   | 2. Devices collection'dan    |
+     |                                   |    diğer cihazları bul       |
+     |                                   |    (senderPlayerId hariç)    |
+     |                                   |                              |
+     |                                   | 3. OneSignal API'ye istek    |
+     |                                   |    gönder                    |
+     |                                   |-------------------------------->
+     |                                   |                              |
+     |                                   |                              | 4. Push bildirim al
+     |                                   |                              |    💕 "Sana bir sevgi
+     |                                   |                              |        notu gönderdi"
+     |                                   |                              |    "Mesaj içeriği"
+```
+
+#### 4. Backend Fonksiyonları
+
+**notifyOtherDevices()** - `backend/routes/notes.js`
+```javascript
+// Gönderen hariç tüm cihazlara bildirim gönder
+await notifyOtherDevices(senderPlayerId, {
+  title: '💕 Sana bir sevgi notu gönderdi',
+  body: text,
+  data: { type: 'notification_only' }
+});
+```
+
+Bu fonksiyon:
+1. MongoDB'den gönderen hariç tüm aktif cihazları bulur
+2. Her cihazın Player ID'sine OneSignal üzerinden bildirim gönderir
+3. OneSignal REST API kullanır (`https://onesignal.com/api/v1/notifications`)
+
+#### 5. Frontend Entegrasyonu
+
+**OneSignal Başlatma** - `frontend/utils/oneSignal.js`
+```javascript
+// Uygulama açılışında
+await OneSignal.initialize(oneSignalAppId);
+const playerId = await OneSignal.User.getOnesignalId();
+await registerDevice(playerId, userName);
+```
+
+**Bildirim Gönderme** - `frontend/screens/LoveNotesScreen.js`
+```javascript
+// Sadece bildirim gönder
+await api.post('/notes/notify', {
+  text: sendNoteText,
+  senderPlayerId: playerId
+});
+
+// Sadece database'e kaydet
+await api.post('/notes', {
+  text: newNoteText
+  // senderPlayerId yok = bildirim gönderilmez
+});
+```
+
+### Önemli Notlar
+
+1. **Player ID Gerekliliği**: Bildirim göndermek için gönderen cihazın Player ID'si gereklidir
+2. **En Az 2 Cihaz**: Bildirimleri test etmek için en az 2 cihazda uygulama yüklü olmalı
+3. **Internet Bağlantısı**: Hem gönderen hem alan cihaz online olmalı
+4. **MongoDB Index**: Eski `pushToken` index'i varsa cihaz kaydı başarısız olur (yukarıda çözümü var)
+5. **OneSignal Limitleri**: Ücretsiz plan 10,000 bildirim/ay sağlar
+6. **Firebase FCM**: Android için Firebase Server Key gereklidir
+
+### Debug ve Test
+
+**Player ID Kontrolü:**
+```bash
+# Settings ekranında görüntüle veya AsyncStorage'dan kontrol et
+```
+
+**Backend Cihaz Listesi:**
+```bash
+curl https://your-backend.onrender.com/api/devices
+```
+
+**Manuel Bildirim Testi:**
+```bash
+curl -X POST https://your-backend.onrender.com/api/notes/notify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Test bildirimi",
+    "senderPlayerId": "cihaz-1-player-id"
+  }'
+```
 
 ## 🛠️ Sorun Giderme
 
@@ -486,6 +672,41 @@ APK build almadan önce mutlaka:
 const IS_PRODUCTION = true; // ✅ true olmalı!
 ```
 
+### Bildirimler çalışmıyor
+
+**1. Player ID alınamıyor:**
+- Ayarlar ekranında "Player ID alınıyor..." yazıyorsa:
+  - OneSignal App ID doğru mu? (`app.json` kontrol edin)
+  - Firebase Server Key OneSignal'e doğru girilmiş mi?
+  - İnternet bağlantısı var mı?
+  - Logları kontrol edin: `npx expo start` terminal output
+
+**2. "Player ID alındı ama backend'e kaydedilemedi" hatası:**
+- Backend çalışıyor mu?
+- API URL doğru mu? (app.json'da `apiBaseUrl`)
+- MongoDB'de `pushToken` index'i var mı? → Silin
+- Backend logs'a bakın: `E11000 duplicate key error` var mı?
+
+**3. Bildirim gönderiliyor ama alınmıyor:**
+- Her iki cihaz da database'de kayıtlı mı? → `GET /api/devices` ile kontrol edin
+- Alıcı cihazın `isActive: true` mi?
+- OneSignal Dashboard → Messages → Delivery bölümünde bildirim gönderilmiş mi?
+- Player ID'ler doğru mu?
+
+**4. İkinci cihaz database'e kaydolmuyor:**
+```bash
+# MongoDB Atlas'ta eski index'i silin
+# Collections → devices → Indexes → pushToken_1 → Delete
+
+# Veya tüm collection'ı drop edin (veriler silinir!)
+# Collections → devices → Drop Collection
+```
+
+**5. OneSignal API hatası:**
+- Backend `.env` dosyasında `ONESIGNAL_APP_ID` ve `ONESIGNAL_REST_API_KEY` var mı?
+- OneSignal Dashboard → Settings → Keys/IDs → REST API Key kopyalandı mı?
+- Backend'i yeniden başlatın: `npm start`
+
 ## 💡 İpuçları
 
 ### Development'da Hızlı Test
@@ -546,7 +767,7 @@ watchman watch-del-all
 
 ## 🚀 Geliştirme Fikirleri
 
-- [ ] Push bildirimleri (Expo Notifications)
+- [x] Push bildirimleri (OneSignal - Tamamlandı ✅)
 - [ ] Mesajlaşma özelliği
 - [ ] Özel gün hatırlatıcıları (doğum günü, yıldönümü)
 - [ ] Tema özelleştirme (koyu mod, renk seçimi)
